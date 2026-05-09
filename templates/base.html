@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Astra{% endblock %} — Task Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+  <div class="app-shell">
+
+    <!-- Slim Icon Sidebar -->
+    <aside class="slim-sidebar">
+      <!-- Logo mark -->
+      <div class="slim-logo">
+        <div class="logo-emblem">
+          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="glass" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                <stop stop-color="white" stop-opacity="0.2" />
+                <stop offset="1" stop-color="white" stop-opacity="0" />
+              </linearGradient>
+            </defs>
+            <rect width="40" height="40" rx="12" fill="#FF6B1A" />
+            <rect width="40" height="40" rx="12" fill="url(#glass)" style="mix-blend-mode: overlay;" />
+            <path d="M20 8L30 32H25L20 19L15 32H10L20 8Z" fill="white" fill-opacity="0.9" />
+            <path d="M16 24H24" stroke="white" stroke-width="2" stroke-linecap="round" />
+            <!-- Circuitry detail -->
+            <circle cx="20" cy="19" r="1.5" fill="#FF6B1A" />
+            <path d="M20 19V24" stroke="#FF6B1A" stroke-width="1" />
+            <circle cx="16" cy="24" r="1" fill="#FF6B1A" />
+            <circle cx="24" cy="24" r="1" fill="#FF6B1A" />
+            <path d="M10 32L14 26" stroke="white" stroke-width="0.5" opacity="0.3" />
+            <path d="M30 32L26 26" stroke="white" stroke-width="0.5" opacity="0.3" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Nav icons -->
+      <nav class="slim-nav">
+        <a href="{{ url_for('main.dashboard') }}"
+          class="slim-link {% if request.endpoint == 'main.dashboard' %}active{% endif %}" title="Dashboard">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="3" y="3" width="7" height="7" rx="1.5" />
+            <rect x="14" y="3" width="7" height="7" rx="1.5" />
+            <rect x="3" y="14" width="7" height="7" rx="1.5" />
+            <rect x="14" y="14" width="7" height="7" rx="1.5" />
+          </svg>
+        </a>
+        <a href="{{ url_for('main.projects') }}"
+          class="slim-link {% if request.endpoint == 'main.projects' %}active{% endif %}" title="Projects">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
+          </svg>
+        </a>
+        <a href="{{ url_for('main.tasks') }}"
+          class="slim-link {% if request.endpoint == 'main.tasks' %}active{% endif %}" title="Tasks">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M9 11l3 3L22 4" />
+            <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+          </svg>
+        </a>
+      </nav>
+
+      <!-- Bottom user + logout -->
+      <div class="slim-bottom">
+        <a href="{{ url_for('auth.logout') }}" class="slim-link" title="Logout">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
+          </svg>
+        </a>
+        <div class="slim-avatar" title="{{ current_user_name }} ({{ current_role }})">
+          {{ current_initials or 'U' }}
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <div class="app-main">
+      <!-- Top Header Bar -->
+      <header class="top-header">
+        <div class="header-left">
+          <div class="search-wrap">
+            <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+              viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8" />
+              <path d="M21 21l-4.35-4.35" />
+            </svg>
+            <input class="search-input" type="text" placeholder="Search tasks, projects or press ⌘ K" id="globalSearch">
+            <span class="search-kbd">⌘ K</span>
+          </div>
+        </div>
+        <div class="header-right">
+          <div class="header-user">
+            <div class="header-avatar">{{ current_initials or 'U' }}</div>
+            <div class="header-user-info">
+              <div class="header-user-name">{{ current_user_name or 'User' }}</div>
+              <div class="header-user-role {% if current_role == 'Admin' %}role-admin{% endif %}">
+                @{{ (current_user_name or 'user').lower().replace(' ','_') }}
+              </div>
+            </div>
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+              style="color:#475569;">
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </div>
+        </div>
+      </header>
+
+      <!-- Page Content -->
+      <div class="page-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-list">
+          {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+  </div>
+
+  <div class="command-palette-overlay" id="commandPaletteOverlay" aria-hidden="true">
+    <div class="command-palette" role="dialog" aria-modal="true" aria-label="Command palette">
+      <div class="cp-header">
+        <div>Command Palette</div>
+        <span>⌘ K</span>
+      </div>
+      <input id="commandPaletteInput" type="text" placeholder="Search actions, projects, tasks…" autocomplete="off" />
+      <div class="cp-actions">
+        <button type="button" data-action="dashboard">Open dashboard</button>
+        <button type="button" data-action="projects">Open projects</button>
+        <button type="button" data-action="tasks">Open tasks</button>
+      </div>
+    </div>
+  </div>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+
+</html>

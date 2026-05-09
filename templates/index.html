@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astra — Launch Your Workflow into Orbit</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #050505;
+            --primary: #FF6B1A;
+            --primary-glow: rgba(255, 107, 26, 0.4);
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
+
+        /* ── Background Effects ── */
+        .bg-blobs {
+            position: fixed; inset: 0; z-index: -1;
+            overflow: hidden; pointer-events: none;
+        }
+        .blob {
+            position: absolute;
+            filter: blur(120px);
+            opacity: 0.15;
+            border-radius: 50%;
+        }
+        .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: var(--primary); }
+        .blob-2 { bottom: -10%; right: -10%; width: 40vw; height: 40vw; background: #7c3aed; }
+
+        /* ── Header ── */
+        header {
+            position: fixed; top: 0; width: 100%; z-index: 100;
+            padding: 20px 8%;
+            display: flex; justify-content: space-between; align-items: center;
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .logo { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 22px; letter-spacing: -0.5px; }
+        .logo img { height: 32px; width: 32px; object-fit: contain; }
+        
+        nav { display: flex; gap: 32px; }
+        nav a { text-decoration: none; color: var(--text-muted); font-size: 14px; font-weight: 500; transition: color 0.2s; }
+        nav a:hover { color: var(--text); }
+
+        .header-actions { display: flex; gap: 16px; }
+        .btn-ghost { padding: 10px 20px; border-radius: 100px; font-size: 14px; font-weight: 600; cursor: pointer; color: var(--text); text-decoration: none; }
+        .btn-primary { 
+            padding: 10px 24px; border-radius: 100px; font-size: 14px; font-weight: 700; cursor: pointer; 
+            background: var(--primary); color: white; border: none; text-decoration: none;
+            box-shadow: 0 4px 15px var(--primary-glow); transition: all 0.2s;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px var(--primary-glow); }
+
+        /* ── Hero ── */
+        .hero {
+            padding: 180px 8% 120px;
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+        }
+        .hero-badge {
+            background: rgba(255, 107, 26, 0.1);
+            border: 1px solid rgba(255, 107, 26, 0.2);
+            color: var(--primary);
+            padding: 6px 16px; border-radius: 100px;
+            font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+            margin-bottom: 32px;
+            animation: fadeInDown 0.8s ease;
+        }
+        .hero h1 {
+            font-size: clamp(48px, 8vw, 96px);
+            font-weight: 900; line-height: 1; letter-spacing: -0.04em;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #fff 50%, rgba(255,255,255,0.4));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p {
+            font-size: clamp(18px, 1.5vw, 22px);
+            color: var(--text-muted);
+            max-width: 650px; margin-bottom: 48px;
+            animation: fadeInUp 1s ease;
+        }
+        .hero-btns { display: flex; gap: 20px; }
+        .hero-btns .btn-large { padding: 18px 40px; font-size: 18px; border-radius: 16px; }
+
+        /* ── Dashboard Preview ── */
+        .preview {
+            padding: 0 8%;
+            margin-top: -40px;
+            perspective: 2000px;
+        }
+        .preview-inner {
+            background: rgba(18, 18, 28, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 12px;
+            backdrop-filter: blur(24px);
+            transform: rotateX(10deg);
+            box-shadow: 0 50px 100px rgba(0,0,0,0.8), 0 0 50px rgba(255, 107, 26, 0.05);
+            animation: float 6s ease-in-out infinite;
+        }
+        .preview-img {
+            width: 100%; border-radius: 16px;
+            aspect-ratio: 16/9;
+            background: #0a0a14;
+            padding: 32px;
+            display: flex; gap: 24px;
+            overflow: hidden;
+            position: relative;
+        }
+        .preview-sidebar { width: 60px; height: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 12px; }
+        .preview-main { flex: 1; display: flex; flex-direction: column; gap: 24px; }
+        .preview-stats { display: flex; gap: 16px; }
+        .preview-stat { flex: 1; height: 80px; background: var(--glass); border: 1px solid var(--glass-border); border-radius: 16px; }
+        .preview-chart { flex: 1; background: var(--glass); border: 1px solid var(--glass-border); border-radius: 20px; position: relative; overflow: hidden; }
+        .preview-chart::before {
+            content: ""; position: absolute; inset: 0;
+            background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+            z-index: 1;
+        }
+        .preview-chart::after {
+            content: ""; position: absolute; bottom: 0; left: 0; width: 200%; height: 60%;
+            background: linear-gradient(0deg, rgba(255, 107, 26, 0.2) 0%, transparent 100%);
+            clip-path: polygon(0 80%, 10% 60%, 20% 75%, 30% 45%, 40% 65%, 50% 30%, 60% 80%, 70% 60%, 80% 75%, 90% 45%, 100% 100%, 0 100%);
+            animation: chartFlow 20s linear infinite;
+            z-index: 2;
+        }
+        @keyframes chartFlow {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .preview-scan-line {
+            position: absolute; top: 0; bottom: 0; width: 2px;
+            background: linear-gradient(to bottom, transparent, var(--primary), transparent);
+            box-shadow: 0 0 15px var(--primary);
+            z-index: 3;
+            animation: scan 4s ease-in-out infinite;
+        }
+        @keyframes scan {
+            0% { left: 0%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { left: 100%; opacity: 0; }
+        }
+
+        /* ── Features ── */
+        .features {
+            padding: 140px 8%;
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px;
+        }
+        .feature-card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            transition: all 0.3s;
+        }
+        .feature-card:hover {
+            border-color: rgba(255, 107, 26, 0.3);
+            transform: translateY(-8px);
+            background: rgba(255, 107, 26, 0.02);
+        }
+        .feature-icon {
+            width: 48px; height: 48px; border-radius: 12px;
+            background: rgba(255, 107, 26, 0.1);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--primary);
+            margin-bottom: 24px;
+        }
+        .feature-card h3 { font-size: 20px; font-weight: 800; margin-bottom: 16px; }
+        .feature-card p { color: var(--text-muted); font-size: 15px; line-height: 1.6; }
+
+        /* ── Animations ── */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes float {
+            0%, 100% { transform: rotateX(10deg) translateY(0); }
+            50% { transform: rotateX(8deg) translateY(-20px); }
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 1024px) {
+            .features { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 768px) {
+            .features { grid-template-columns: 1fr; }
+            nav { display: none; }
+            .hero h1 { font-size: 48px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <header>
+        <div class="logo" style="display:flex; align-items:center; gap:12px; font-weight:900; font-size:24px; letter-spacing:-1px; text-transform:uppercase;">
+            <div class="logo-emblem-small" style="width:36px; height:36px; border-radius:10px; background:#FF6B1A; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;">
+              <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:28px; height:28px;">
+                <path d="M20 8L30 32H25L20 19L15 32H10L20 8Z" fill="white" fill-opacity="0.9" />
+                <path d="M16 24H24" stroke="white" stroke-width="2" stroke-linecap="round" />
+                <circle cx="20" cy="19" r="1.5" fill="#FF6B1A" />
+                <path d="M20 19V24" stroke="#FF6B1A" stroke-width="1" />
+              </svg>
+              <div style="position:absolute; inset:0; background:linear-gradient(135deg, rgba(255,255,255,0.2), transparent); pointer-events:none;"></div>
+            </div>
+            ASTRA
+        </div>
+        <nav>
+            <a href="#features">Features</a>
+            <a href="#solutions">Solutions</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#company">Company</a>
+        </nav>
+        <div class="header-actions">
+            <a href="{{ url_for('auth.login') }}" class="btn-ghost">Login</a>
+            <a href="{{ url_for('auth.signup') }}" class="btn-primary">Get Started</a>
+        </div>
+    </header>
+
+    <main style="position:relative;">
+        <div style="position:absolute; top:200px; left:50%; transform:translateX(-50%); font-size:25vw; font-weight:900; color:white; opacity:0.02; pointer-events:none; z-index:-1; letter-spacing:-0.05em;">ASTRA</div>
+        <section class="hero">
+            <div class="hero-badge">✦ The Future of Workflow is Here</div>
+            <h1>Launch Your Workflow into Orbit.</h1>
+            <p>Astra is the industrial-strength unified workspace for modern teams to manage projects, track progress, and collaborate in real-time—without the friction.</p>
+            <div class="hero-btns">
+                <a href="{{ url_for('auth.signup') }}" class="btn-primary btn-large">Start Free Trial</a>
+                <a href="#" class="btn-ghost btn-large" style="border: 1px solid var(--glass-border)">Watch Demo</a>
+            </div>
+        </section>
+
+        <section class="preview">
+            <div class="preview-inner">
+                <div class="preview-img">
+                    <div class="preview-sidebar"></div>
+                    <div class="preview-main">
+                        <div class="preview-stats">
+                            <div class="preview-stat"></div>
+                            <div class="preview-stat" style="background: rgba(255,107,26,0.1); border-color: rgba(255,107,26,0.2);"></div>
+                            <div class="preview-stat"></div>
+                        </div>
+                        <div class="preview-chart">
+                            <div class="preview-scan-line"></div>
+                            <div style="position:absolute; top:12px; right:12px; font-size:10px; font-weight:800; color:var(--primary); letter-spacing:1px; z-index:5; display:flex; align-items:center; gap:6px;">
+                                <span style="display:inline-block; width:6px; height:6px; background:var(--primary); border-radius:50%; box-shadow:0 0 8px var(--primary); animation: pulse 2s infinite;"></span>
+                                TEAM SYNC: ACTIVE
+                            </div>
+                            <div style="padding: 20px; font-size: 14px; font-weight: 700; opacity: 0.5; position: relative; z-index: 4;">WORKSPACE VELOCITY</div>
+                            <div style="padding: 0 20px; position: relative; z-index: 4;">
+                                <div class="preview-task" style="height: 12px; background: rgba(255,255,255,0.05); border-radius: 4px; margin-bottom: 8px; width: 80%;"></div>
+                                <div class="preview-task" style="height: 12px; background: rgba(255,107,26,0.15); border-radius: 4px; margin-bottom: 8px; width: 40%;"></div>
+                                <div class="preview-task" style="height: 12px; background: rgba(255,255,255,0.05); border-radius: 4px; margin-bottom: 8px; width: 60%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="features" id="features">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+                </div>
+                <h3>Hyper-Functional Analytics</h3>
+                <p>Track team velocity with industrial-grade precision. Our real-time engine delivers insights that drive results.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A10.003 10.003 0 0112 3c1.268 0 2.47.234 3.575.661M9.753 20.571A10.011 10.011 0 0012 21a9.966 9.966 0 005.071-1.383m-7.318-12.234A3 3 0 0012 15a3 3 0 005.071-1.383"></path></svg>
+                </div>
+                <h3>Cyber-Elegance Design</h3>
+                <p>A interface that feels alive. Built with glassmorphism and industrial tech aesthetics for a premium user experience.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2m12-9a4 4 0 11-8 0 4 4 0 018 0zm2 10V7m0 0l-3 3m3-3l3 3"></path></svg>
+                </div>
+                <h3>Team-First Collaboration</h3>
+                <p>Unified workspace for modern teams. Break down silos and launch projects faster with Astra's collaborative tools.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer style="padding: 100px 8% 60px; border-top: 1px solid var(--glass-border); text-align: center; color: var(--text-muted); font-size: 14px;">
+        <div style="margin-bottom: 32px; display:flex; flex-direction:column; align-items:center; gap:16px;">
+            <div class="logo-emblem-small" style="width:48px; height:48px; border-radius:12px; background:#FF6B1A; display:flex; align-items:center; justify-content:center; opacity:0.6;">
+              <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:36px; height:36px;">
+                <path d="M20 8L30 32H25L20 19L15 32H10L20 8Z" fill="white" fill-opacity="0.9" />
+                <path d="M16 24H24" stroke="white" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </div>
+            <span style="font-size:32px; font-weight:900; letter-spacing:4px; color:white; opacity:0.4;">ASTRA</span>
+        </div>
+        <p>&copy; 2026 Astra Technologies. All rights reserved.</p>
+    </footer>
+</body>
+</html>

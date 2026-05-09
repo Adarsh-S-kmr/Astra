@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div style="font-size:12px;font-weight:700;color:var(--orange);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 10px var(--orange);"></span>
+      Mission Control
+    </div>
+    <h1 class="page-title">Workspace <span style="color:var(--muted);font-weight:400;margin-left:8px;">/ Overview</span></h1>
+    <p class="page-subtitle">Strategic overview of team performance and milestone tracking.</p>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    {% if current_role == 'Admin' %}
+    <button class="btn btn-primary" onclick="openModal('quick-task-modal')" style="padding: 12px 24px; border-radius: 14px;">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      Deploy Task
+    </button>
+    {% endif %}
+  </div>
+</div>
+
+<div class="dash-grid">
+  <!-- LEFT: Analytics & Core Stats -->
+  <div class="dash-left">
+    <!-- Main Analytics Card -->
+    <div class="card chart-card premium-velocity-card">
+      <div class="velocity-bg-grid"></div>
+      <div class="chart-header">
+        <div>
+          <div style="font-size:10px; font-weight:800; color:var(--orange); letter-spacing:2px; text-transform:uppercase; margin-bottom:4px;">Live Velocity Engine</div>
+          <div class="card-title" style="font-size:24px; font-weight:900;">Production Velocity</div>
+          <div class="card-sub">Daily task output vs projected capacity</div>
+        </div>
+        <div class="chart-filters">
+          <button class="chart-filter active">14D</button>
+          <button class="chart-filter">30D</button>
+        </div>
+      </div>
+      <div class="chart-wrap" style="height: 280px; position: relative; z-index: 2;">
+        <canvas id="taskChart"></canvas>
+      </div>
+      <div class="velocity-footer">
+        <div class="vf-item">
+          <div class="vf-label">Current Velocity</div>
+          <div style="display:flex; align-items:baseline; gap:8px;">
+            <div class="vf-val">{{ ((total - pending) / 14) | round(1) if total > 0 else 0 }}</div>
+            <div class="vf-unit">T/DAY</div>
+          </div>
+          <div class="vf-pulse-container">
+            <div class="vf-pulse-line"></div>
+          </div>
+        </div>
+        <div class="vf-item">
+          <div class="vf-label">Efficiency Rate</div>
+          <div class="vf-val">94.2<span class="vf-unit">%</span></div>
+          <div style="font-size:10px; color:var(--emerald); font-weight:700; margin-top:4px;">+2.4% OPTIMIZED</div>
+        </div>
+      </div>
+      <!-- Decorative Cyber Lines -->
+      <div style="position:absolute; top:20px; right:20px; display:flex; flex-direction:column; gap:4px; opacity:0.4;">
+        <div style="width:40px; height:2px; background:var(--orange);"></div>
+        <div style="width:20px; height:2px; background:var(--orange); align-self:flex-end;"></div>
+      </div>
+    </div>
+
+    <!-- Triple Metric Row -->
+    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+      <div class="card" style="padding: 24px; display: flex; flex-direction: column; align-items: center; text-align: center;">
+        <div style="width: 50px; height: 50px; border-radius: 50%; background: rgba(16, 185, 129, 0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+          <svg width="24" height="24" fill="none" stroke="#10b981" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <div class="stat-val" style="font-size: 24px; color: #10b981;">{{ total - pending }}</div>
+        <div class="stat-label">Tasks Shipped</div>
+      </div>
+      <div class="card" style="padding: 24px; display: flex; flex-direction: column; align-items: center; text-align: center;">
+        <div style="width: 50px; height: 50px; border-radius: 50%; background: rgba(245, 158, 11, 0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+          <svg width="24" height="24" fill="none" stroke="#f59e0b" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <div class="stat-val" style="font-size: 24px; color: #f59e0b;">{{ pending }}</div>
+        <div class="stat-label">In Orbit</div>
+      </div>
+      <div class="card" style="padding: 24px; display: flex; flex-direction: column; align-items: center; text-align: center;">
+        <div style="width: 50px; height: 50px; border-radius: 50%; background: rgba(239, 68, 68, 0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+          <svg width="24" height="24" fill="none" stroke="#ef4444" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <div class="stat-val" style="font-size: 24px; color: #ef4444;">{{ overdue_count }}</div>
+        <div class="stat-label">Critical Alerts</div>
+      </div>
+    </div>
+
+    <!-- Interactive Grid: Projects & Actions -->
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <!-- Project Monitoring -->
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+          <div class="card-title">Project Pipelines</div>
+          <a href="{{ url_for('main.projects') }}" class="btn btn-ghost btn-sm">View Fleet</a>
+        </div>
+        <div class="project-stack">
+          {% for p in all_projects[:4] %}
+          <div class="proj-item" style="padding: 16px; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 12px;">
+            <div class="proj-item-header" style="margin-bottom: 12px;">
+              <div class="proj-item-letter" style="background: var(--orange);">{{ p.title[0].upper() }}</div>
+              <div style="flex:1;">
+                <div class="proj-item-name" style="font-size: 14px;">{{ p.title }}</div>
+                <div class="proj-item-meta">{{ p.progress_pct }}% complete · {{ p.task_count }} items</div>
+              </div>
+            </div>
+            <div class="proj-progress" style="height: 6px; border-radius: 10px;">
+              <div class="proj-progress-fill" style="width:{{ p.progress_pct }}%; background: var(--orange); box-shadow: 0 0 10px var(--orange-glow);"></div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Team Contribution Donut -->
+      <div class="card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; min-height: 380px;">
+        <div class="card-title" style="margin-bottom:20px; width:100%; text-align:left;">Resource Allocation</div>
+        <div style="width:200px; height:200px; position:relative; flex-shrink:0;">
+          <canvas id="teamDonut" style="width:100%; height:100%;"></canvas>
+          <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none;">
+            <div style="font-size:28px; font-weight:900; color:var(--text);">92%</div>
+            <div style="font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;">Load</div>
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; width:100%; margin-top:32px;">
+          <div style="padding:10px; background:rgba(255,255,255,0.02); border-radius:12px; border:1px solid var(--border);">
+            <div style="font-size:10px; color:var(--muted); margin-bottom:4px;">ENG</div>
+            <div style="font-size:14px; font-weight:700; color:var(--orange);">45%</div>
+          </div>
+          <div style="padding:10px; background:rgba(255,255,255,0.02); border-radius:12px; border:1px solid var(--border);">
+            <div style="font-size:10px; color:var(--muted); margin-bottom:4px;">DESIGN</div>
+            <div style="font-size:14px; font-weight:700; color:#7c3aed;">25%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Team & Activity Feed -->
+  <div class="dash-right">
+    <!-- Team Roster -->
+    <div class="card">
+      <div class="quick-card-title">✦ Team Members</div>
+      <div style="display:flex; flex-direction:column; gap:12px; margin-top:20px;">
+        {% for u in all_users[:6] %}
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div class="avatar-sm" style="background: var(--surface2); color: var(--text); border: 1px solid var(--border);">{{ u.initials }}</div>
+          <div style="flex:1;">
+            <div style="font-size:13px; font-weight:700;">{{ u.name }}</div>
+            <div style="font-size:11px; color: var(--muted);">{{ u.role }}</div>
+          </div>
+          <div style="width:8px; height:8px; border-radius:50%; background: #10b981;"></div>
+        </div>
+        {% endfor %}
+      </div>
+      <button class="btn btn-ghost" style="width:100%; margin-top:20px; font-size:12px;">View All Members</button>
+    </div>
+
+    <!-- Recent Signals -->
+    <div class="card" style="flex:1;">
+      <div class="quick-card-title">Recent Signals</div>
+      <div class="task-feed" style="margin-top:20px;">
+        {% for t in recent_tasks[:6] %}
+        <div class="task-feed-item" style="padding-bottom: 16px; border-bottom: 1px solid var(--border); margin-bottom: 16px;">
+          <div class="tfi-avatar" style="background: var(--orange); color: white; border: none;">{{ t._assignee.initials if t._assignee else '?' }}</div>
+          <div style="flex:1; min-width:0;">
+            <div class="tfi-name" style="font-size:13px;">{{ t.title }}</div>
+            <div class="tfi-date" style="font-size:11px;">{{ t._project.title if t._project else 'General' }}</div>
+          </div>
+          <div class="badge {% if t.status == 'Done' %}b-done{% elif t.status == 'In Progress' %}b-progress{% else %}b-todo{% endif %}">{{ t.status }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Create Modal -->
+{% if current_role == 'Admin' %}
+<div class="modal-overlay" id="quick-task-modal">
+  <div class="modal" style="border-radius: 24px; border: 1px solid var(--border); background: rgba(10, 10, 14, 0.98);">
+    <div class="modal-header">
+      <span class="modal-title">New Task Deployment</span>
+      <button class="modal-close" onclick="closeModal('quick-task-modal')">×</button>
+    </div>
+    <form method="POST" action="{{ url_for('main.tasks') }}" style="padding: 24px;">
+      <div class="form-group">
+        <label>Designation *</label>
+        <input type="text" name="title" placeholder="Task title" required style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px;">
+      </div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div class="form-group">
+          <label>Project Pipeline *</label>
+          <select name="project_id" required style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px;">
+            {% for p in all_projects %}
+            <option value="{{ p.id }}">{{ p.title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Assignee</label>
+          <select name="assignee_id" style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px;">
+            <option value="">Unassigned</option>
+            {% for u in all_users %}
+            <option value="{{ u.id }}">{{ u.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:24px;">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('quick-task-modal')" style="border-radius: 12px;">Abort</button>
+        <button type="submit" class="btn btn-primary" style="border-radius: 12px; padding: 12px 24px;">Confirm Deployment</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

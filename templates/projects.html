@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Projects{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Projects</h1>
+    <p class="page-subtitle">{{ projects|length }} project{{ 's' if projects|length != 1 else '' }} in your workspace.</p>
+  </div>
+  {% if current_role == 'Admin' %}
+  <button class="btn btn-primary" onclick="openModal('new-project-modal')">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path d="M12 5v14M5 12h14"/>
+    </svg>
+    New Project
+  </button>
+  {% endif %}
+</div>
+
+{% if projects %}
+<div class="projects-grid">
+  {% for p in projects %}
+  <div class="glass-card project-card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+      <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,rgba(249,115,22,0.2),rgba(249,115,22,0.05));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#f97316;">
+        {{ p.title[0].upper() }}
+      </div>
+      {% if current_role == 'Admin' %}
+      <form method="POST" action="{{ url_for('main.delete_project', project_id=p.id) }}"
+            onsubmit="return confirm('Delete this project and all its tasks?')">
+        <button class="btn btn-danger btn-sm" type="submit">✕</button>
+      </form>
+      {% endif %}
+    </div>
+
+    <h2 style="font-size:15px;font-weight:700;margin-bottom:6px;">{{ p.title }}</h2>
+    <p style="font-size:12px;color:#64748b;min-height:36px;line-height:1.6;">
+      {{ p.description or 'No description provided.' }}
+    </p>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;margin-bottom:6px;">
+      <span style="font-size:11px;color:#64748b;">
+        By <span style="color:#94a3b8;font-weight:600;">{{ p._creator.name if p._creator else 'Unknown' }}</span>
+      </span>
+      <span style="font-size:11px;color:#64748b;">{{ p.done_count }}/{{ p.task_count }} done</span>
+    </div>
+
+    <div class="progress-bar">
+      <div class="progress-fill" style="width:{{ p.progress_pct }}%;"></div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;">
+      <span style="font-size:11px;color:#64748b;">{{ p.task_count }} task{{ 's' if p.task_count != 1 else '' }}</span>
+      <span style="font-size:11px;font-weight:600;color:{% if p.progress_pct == 100 %}#10b981{% elif p.progress_pct > 0 %}#f59e0b{% else %}#64748b{% endif %};">
+        {{ p.progress_pct }}%
+      </span>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="glass-card">
+  <div class="empty-state">
+    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+      <path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/>
+    </svg>
+    <p>No projects yet.{% if current_role == 'Admin' %} Create your first project to get started.{% endif %}</p>
+  </div>
+</div>
+{% endif %}
+
+<!-- New Project Modal (Admin only) -->
+{% if current_role == 'Admin' %}
+<div class="modal-overlay" id="new-project-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Create Project</span>
+      <button class="modal-close" onclick="closeModal('new-project-modal')">×</button>
+    </div>
+    <form method="POST" action="{{ url_for('main.projects') }}" data-validate>
+      <div class="form-group">
+        <label for="proj-title">Project title *</label>
+        <input type="text" id="proj-title" name="title" placeholder="e.g. Website Redesign" required>
+      </div>
+      <div class="form-group">
+        <label for="proj-desc">Description</label>
+        <textarea id="proj-desc" name="description" placeholder="What is this project about?"></textarea>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('new-project-modal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Create Project</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
