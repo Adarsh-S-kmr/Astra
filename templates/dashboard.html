@@ -154,6 +154,11 @@
             <div style="font-size:11px; color: var(--muted);">{{ u.role }}</div>
           </div>
           <div style="width:8px; height:8px; border-radius:50%; background: #10b981;"></div>
+          {% if current_role == 'Admin' and u.id != current_user_id %}
+          <form method="POST" action="{{ url_for('main.delete_user', user_id=u.id) }}" onsubmit="return confirm('Remove this user from the workspace?')" style="margin-left: 8px;">
+            <button type="submit" style="background:none; border:none; color:var(--red); cursor:pointer; font-size:14px; padding:4px;">✕</button>
+          </form>
+          {% endif %}
         </div>
         {% endfor %}
       </div>

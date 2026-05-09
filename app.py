@@ -276,6 +276,26 @@ def delete_project(project_id):
     return redirect(url_for("main.projects"))
 
 
+@main_bp.route("/users/<int:user_id>/delete", methods=["POST"])
+@admin_required
+def delete_user(user_id):
+    if user_id == session.get("user_id"):
+        flash("You cannot delete your own administrative account.", "error")
+        return redirect(url_for("main.dashboard"))
+
+    user = User.query.get_or_404(user_id)
+    
+    # Check if user owns projects (due to foreign key constraints)
+    if Project.query.filter_by(created_by=user.id).first():
+        flash(f"Cannot delete {user.name} because they are the creator of one or more projects. Reassign or delete those projects first.", "error")
+        return redirect(url_for("main.dashboard"))
+
+    db.session.delete(user)
+    db.session.commit()
+    flash(f"User {user.name} has been removed from the workspace.", "info")
+    return redirect(url_for("main.dashboard"))
+
+
 # ─── Chart API ────────────────────────────────────────────────────────────────
 
 @main_bp.route("/api/chart-data")
