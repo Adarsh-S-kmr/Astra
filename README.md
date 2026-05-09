@@ -1,115 +1,66 @@
-# Astra — Team Task Manager
+# ☄️ Astra — Intelligent Task Velocity Engine
 
-A full-stack team task manager built with Python/Flask, featuring dark glassmorphism UI, role-based access control (RBAC), and real-time dashboard metrics.
+Astra is a high-performance, full-stack task management platform designed with a **premium dark-mode glassmorphism** aesthetic. It provides teams with a streamlined "Mission Control" to track projects, manage task velocity, and maintain production standards through an intuitive, high-density dashboard.
 
----
+![Astra Banner](https://raw.githubusercontent.com/Adarsh-S-kmr/Astra/main/static/js/logo.png)
 
-## Features
+## 💎 Design Philosophy
+Astra is built to look and feel like a modern financial terminal or aerospace control system. It utilizes:
+*   **Glassmorphism**: Layered transparency with real-time backdrop-blur.
+*   **Cyber-Orange Accents**: High-contrast indicators for critical task status.
+*   **Micro-Animations**: Smooth transitions and status "pulses" for live feedback.
 
-| Feature | Details |
-|---|---|
-| 🔐 Authentication | Secure signup/login with bcrypt password hashing |
-| 👥 RBAC | Admin and Member roles — Admins create projects & assign tasks |
-| 📊 Dashboard | Total/pending/overdue metrics + Chart.js completion trend graph |
-| 📁 Projects | Admin can create/delete projects; all users view progress |
-| ✅ Tasks | Inline status updates (AJAX), overdue highlighting, red pulse indicators |
-| 🎨 UI | Dark glassmorphism (#0a0a0a), orange accents (#f97316), animated modals |
-| 🚀 Deployment | Railway/Heroku-ready with Procfile & gunicorn |
+## 🚀 Key Features
 
----
+| Feature | Description |
+| :--- | :--- |
+| **📊 Mission Control** | Real-time analytics dashboard with 14-day velocity tracking via Chart.js. |
+| **🛡️ RBAC Security** | Role-Based Access Control distinguishing Administrative and Member permissions. |
+| **📁 Pipeline Management** | Multi-project tracking with progress bars and automated completion percentages. |
+| **⚡ Instant Actions** | AJAX-powered status updates (Todo → In Progress → Done) without page reloads. |
+| **⏰ Velocity Alerts** | Visual pulse indicators for overdue tasks and upcoming deadlines. |
+| **⌨️ Command Palette** | Power-user shortcuts (`Ctrl+K`) for rapid navigation across the workspace. |
 
-## Local Setup
+## 🛠️ Tech Stack
+*   **Backend**: Python / Flask
+*   **Database**: PostgreSQL (Production) / SQLite (Development)
+*   **Frontend**: Vanilla JS (ES6+), HTML5, CSS3 (Custom Design System)
+*   **Charts**: Chart.js v4.4
+*   **Security**: Bcrypt Hashing, Session-based RBAC
+*   **Deployment**: Railway.app / Gunicorn
 
-### 1. Clone & enter directory
+## 🚥 Quick Start
+
+### 1. Clone the repository
 ```bash
-git clone <your-repo-url>
-cd project-Astra
+git clone https://github.com/Adarsh-S-kmr/Astra.git
+cd Astra
 ```
 
-### 2. Create virtual environment
-```bash
-python -m venv venv
-# Windows:
-venv\Scripts\activate
-# macOS/Linux:
-source venv/bin/activate
-```
-
-### 3. Install dependencies
+### 2. Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Configure environment
-```bash
-copy .env.example .env     # Windows
-# cp .env.example .env     # macOS/Linux
-# Edit .env and set a strong SECRET_KEY
+### 3. Initialize Environment
+Create a `.env` file in the root directory:
+```env
+SECRET_KEY=your_secret_key_here
+DATABASE_URL=sqlite:///astra.db
 ```
 
-### 5. Run the app
+### 4. Launch Application
 ```bash
-flask run
-# or
 python app.py
 ```
 
-Open **http://127.0.0.1:5000** in your browser.
-
----
-
-## Demo Accounts
+## 🧪 Demo Access
+If you are visiting the live deployment, use these credentials to explore the workspace:
 
 | Role | Email | Password |
-|---|---|---|
-| Admin | admin@astra.dev | admin123 |
-| Member | member@astra.dev | member123 |
-
-These are seeded automatically on first run.
+| :--- | :--- | :--- |
+| **Admin** | `admin@gmail.com` | `admin123` |
+| **Member** | `member@gmail.com` | `member123` |
 
 ---
-
-## RBAC Summary
-
-| Action | Admin | Member |
-|---|---|---|
-| View Dashboard | ✅ | ✅ |
-| Create Project | ✅ | ❌ |
-| Create & Assign Task | ✅ | ❌ |
-| Change Task Status | ✅ (any) | ✅ (own only) |
-| Delete Tasks/Projects | ✅ | ❌ |
-
----
-
-## Railway Deployment
-
-1. Push to GitHub
-2. Connect repo to [Railway](https://railway.app)
-3. Add environment variables:
-   - `SECRET_KEY` — a long random string
-   - `DATABASE_URL` — Railway PostgreSQL URL (auto-set if you add a PostgreSQL plugin)
-4. Railway detects `Procfile` and runs `gunicorn app:app` automatically
-
----
-
-## Project Structure
-
-```
-project-Astra/
-├── app.py              # Routes, dashboard metrics, chart API
-├── auth.py             # Login/signup/logout + RBAC decorators
-├── models.py           # SQLAlchemy User, Project, Task models
-├── requirements.txt
-├── Procfile
-├── .env.example
-└── templates/
-│   ├── base.html       # Sidebar layout
-│   ├── login.html
-│   ├── signup.html
-│   ├── dashboard.html
-│   ├── projects.html
-│   └── tasks.html
-└── static/
-    ├── css/style.css   # Glassmorphism design system
-    └── js/app.js       # Chart.js, AJAX, modals, validation
-```
+*Created with ❤️ by Adarsh S Kumar*
